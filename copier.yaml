@@ -1,8 +1,5 @@
 _subdirectory: template
 _templates_suffix: .jinja
-_exclude:
-  - "{% if not has_disruption_budget %}base/disruption-budget.yaml.jinja{% endif %}"
-  - "{% if not has_service_account %}base/service-account.yaml.jinja{% endif %}"
 
 project_name:
   type: str
