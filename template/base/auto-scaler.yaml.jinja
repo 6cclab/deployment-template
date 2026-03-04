@@ -1,0 +1,28 @@
+kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/v2
+metadata:
+  name: {{ service_name }}-hpa
+  labels:
+    app: {{ service_name }}
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: {{ service_name }}
+    apiVersion: apps/v1
+  minReplicas: 2
+  maxReplicas: 4
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 45
+      selectPolicy: Max

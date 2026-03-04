@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ service_name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ service_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ service_name }}
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: {{ service_name }}
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: 'deployment.environment=d'
+            - name: OTEL_DEPLOYMENT_ENVIRONMENT
+              value: 'd'

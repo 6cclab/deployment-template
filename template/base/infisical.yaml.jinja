@@ -1,0 +1,26 @@
+apiVersion: secrets.infisical.com/v1alpha1
+kind: InfisicalSecret
+metadata:
+  name: {{ secret_name }}
+spec:
+  hostAPI: https://infisical.6cclab.dev/api
+  resyncInterval: 60
+  authentication:
+    kubernetesAuth:
+      identityId: {{ infisical_identity_id }}
+      autoCreateServiceAccountToken: true
+      serviceAccountRef:
+        name: default
+        namespace: {{ project_name }}-{{ service_name }}-dev
+      secretsScope:
+        projectId: {{ infisical_project_id }}
+        envSlug: dev
+        secretsPath: /
+        recursive: true
+  managedKubeSecretReferences:
+    - secretName: {{ secret_name }}
+      secretNamespace: {{ project_name }}-{{ service_name }}-dev
+      creationPolicy: Owner
+      secretType: Opaque
+      template:
+        includeAllSecrets: true

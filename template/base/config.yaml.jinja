@@ -1,0 +1,8 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ config_map_name }}
+data:
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://signoz-otel-collector.signoz.svc.cluster.local:4318
+  PYROSCOPE_SERVER_ADDRESS: http://pyroscope.monitoring.svc.cluster.local:4040
+  LOG_LEVEL: info

@@ -1,0 +1,12 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ config_map_name }}
+data:
+  CORS_CONFIG: |
+    {
+      "origin": ["https://{{ dev_host }}"],
+      "methods": ["GET","POST","PUT","DELETE","OPTIONS"],
+      "allowedHeaders": ["Content-Type","Authorization"],
+      "credentials": true
+    }

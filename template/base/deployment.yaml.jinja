@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ service_name }}
+  annotations:
+    secrets.infisical.com/auto-reload: 'true'
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '{{ container_port }}'
+    prometheus.io/path: '/metrics'
+
+spec:
+  selector:
+    matchLabels:
+      app: {{ service_name }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ service_name }}
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: {{ service_name }}
+          image: {{ image_registry }}/{{ project_name }}/dev/{{ service_name }}:latest
+          imagePullPolicy: {{ image_pull_policy }}
+          envFrom:
+            - configMapRef:
+                name: {{ config_map_name }}
+            - secretRef:
+                name: {{ secret_name }}
+          env:
+{%- if sentry_dsn %}
+            - name: SENTRY_DSN
+              value: {{ sentry_dsn }}
+{%- endif %}
+            - name: OTEL_SERVICE_NAME
+              value: {{ otel_service_name }}
+            - name: PORT
+              value: '{{ container_port }}'
+          ports:
+            - containerPort: {{ container_port }}
+              name: http
+          livenessProbe:
+            httpGet:
+              path: {{ liveness_path }}
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: {{ readiness_path }}
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          startupProbe:
+            httpGet:
+              path: {{ readiness_path }}
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+            successThreshold: 1
+          lifecycle:
+            preStop:
+              exec:
+                command: ['/bin/sh', '-c', 'sleep 30s']
+          resources:
+            requests:
+              memory: '{{ memory_request }}'
+              cpu: '{{ cpu_request }}'

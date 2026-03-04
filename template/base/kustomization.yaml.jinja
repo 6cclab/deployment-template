@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - service.yaml
+  - deployment.yaml
+  - config.yaml
+  - auto-scaler.yaml
+  - infisical.yaml
+{%- if has_disruption_budget %}
+  - disruption-budget.yaml
+{%- endif %}
+{%- if has_service_account %}
+  - service-account.yaml
+{%- endif %}

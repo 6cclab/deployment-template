@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ service_name }}
+  labels:
+    app: {{ service_name }}
+spec:
+  type: {{ service_type }}
+{%- if service_type == 'LoadBalancer' %}
+  sessionAffinity: ClientIP
+{%- endif %}
+  ports:
+    - name: http
+      port: 80
+      targetPort: {{ container_port }}
+  selector:
+    app: {{ service_name }}

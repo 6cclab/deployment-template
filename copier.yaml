@@ -1,0 +1,123 @@
+_subdirectory: template
+_templates_suffix: .jinja
+_exclude:
+  - "{% if not has_disruption_budget %}base/disruption-budget.yaml.jinja{% endif %}"
+  - "{% if not has_service_account %}base/service-account.yaml.jinja{% endif %}"
+
+project_name:
+  type: str
+  help: "Project name (e.g., volttrack)"
+
+service_name:
+  type: str
+  help: "Service name (e.g., auth, api, websocket-gateway)"
+
+container_port:
+  type: int
+  default: 3000
+  help: "Container port the application listens on"
+
+image_registry:
+  type: str
+  default: "ghcr.io/6cclab"
+  help: "Container image registry"
+
+domain_zone:
+  type: str
+  default: volttrack
+  help: "Domain zone for host auto-derivation"
+  choices:
+    - volttrack
+    - homelab
+    - bare
+
+domain:
+  type: str
+  default: "volttrack.io"
+  help: "Base domain (only used when zone=volttrack)"
+  when: "{{ domain_zone == 'volttrack' }}"
+
+dev_host:
+  type: str
+  default: "{% if domain_zone == 'volttrack' %}{{ service_name }}.dev.{{ domain }}{% elif domain_zone == 'homelab' %}{{ service_name }}.apps.dev-01.6cclab.dev{% else %}{{ service_name }}.6cclab.dev{% endif %}"
+  help: "Dev ingress hostname (auto-derived from zone, override if needed)"
+
+prd_host:
+  type: str
+  default: "{% if domain_zone == 'volttrack' %}{{ service_name }}.{{ domain }}{% elif domain_zone == 'homelab' %}{{ service_name }}.apps.prod-01.6cclab.dev{% else %}{{ service_name }}.6cclab.dev{% endif %}"
+  help: "Prd ingress hostname (auto-derived from zone, override if needed)"
+
+infisical_project_id:
+  type: str
+  help: "Infisical project ID for secrets management"
+
+infisical_identity_id:
+  type: str
+  default: "ccebb465-42d4-4b19-9dac-9eec7a9e5613"
+  help: "Infisical Kubernetes auth identity ID"
+
+sentry_dsn:
+  type: str
+  default: ""
+  help: "Sentry DSN (omitted from deployment if blank)"
+
+otel_service_name:
+  type: str
+  default: "{{ project_name }}-{{ service_name }}"
+  help: "OpenTelemetry service name"
+
+memory_request:
+  type: str
+  default: "1Gi"
+  help: "Memory request for the container"
+
+cpu_request:
+  type: str
+  default: "200m"
+  help: "CPU request for the container"
+
+liveness_path:
+  type: str
+  default: "/uptime"
+  help: "HTTP path for liveness probe"
+
+readiness_path:
+  type: str
+  default: "/health"
+  help: "HTTP path for readiness probe"
+
+config_map_name:
+  type: str
+  default: "{{ project_name }}-config"
+  help: "Name of the ConfigMap"
+
+secret_name:
+  type: str
+  default: "{{ project_name }}-{{ service_name }}"
+  help: "Name of the Kubernetes Secret (from InfisicalSecret)"
+
+has_disruption_budget:
+  type: bool
+  default: false
+  help: "Include PodDisruptionBudget resource"
+
+has_service_account:
+  type: bool
+  default: false
+  help: "Include ServiceAccount resource"
+
+service_type:
+  type: str
+  default: ClusterIP
+  help: "Kubernetes Service type"
+  choices:
+    - ClusterIP
+    - LoadBalancer
+
+image_pull_policy:
+  type: str
+  default: IfNotPresent
+  help: "Image pull policy"
+  choices:
+    - IfNotPresent
+    - Always
